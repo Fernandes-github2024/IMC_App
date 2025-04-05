@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de IMC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @media print {
+            body {
+                background: none !important;
+                min-height: auto;
+                padding: 0;
+                margin: 1in;
+                /* Standard print margin */
+            }
+
+            body * {
+                visibility: hidden;
+                /* Hide everything by default */
+            }
+
+            .printable-result,
+            .printable-result * {
+                visibility: visible;
+                /* Show only the result section and its contents */
+            }
+
+            .printable-result {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+                border: 1px solid #ccc;
+                padding: 20px;
+                margin: 0;
+                border-radius: 0;
+                background-color: white !important;
+                /* Ensure white background for print */
+            }
+
+            .printable-result h2 {
+                font-size: 18pt;
+                text-align: center;
+                margin-bottom: 20px;
+                color: black;
+            }
+
+            .printable-result p,
+            .printable-result div,
+            .printable-result span {
+                font-size: 12pt;
+                color: black !important;
+                /* Ensure text is black */
+                font-style: normal;
+                /* Reset italics if any */
+            }
+
+            .printable-result .text-sm {
+                font-size: 11pt;
+            }
+
+            .printable-result .font-bold {
+                font-weight: bold;
+            }
+
+            .printable-result i {
+                display: none;
+                /* Hide icons */
+            }
+
+            .print-button {
+                display: none !important;
+                /* Hide the print button itself */
+            }
+
+            /* Ensure result sections are clearly separated */
+            .printable-result>div:not(:last-child) {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-100 to-blue-300 flex items-center justify-center min-h-screen p-4">
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        function ImcCalculator() {
+            const [peso, setPeso] = React.useState('');
+            const [altura, setAltura] = React.useState('');
+            const [resultado, setResultado] = React.useState(null);
+
+            const calcularIMC = () => {
+                if (peso && altura) {
+                    const imc = peso / (altura * altura);
+                    setResultado(imc.toFixed(2));
+                }
+            };
+
+            const interpretarIMC = (imc) => {
+                if (imc < 18.5) return {
+                    texto: "Abaixo do peso",
+                    cor: "text-yellow-600",
+                    icone: "fa-solid fa-triangle-exclamation",
+                    pesoIdeal: "Você está abaixo do peso ideal. Considere consultar um nutricionista para ganhar massa muscular de forma saudável."
+                };
+                if (imc < 25) return {
+                    texto: "Peso normal",
+                    cor: "text-green-600",
+                    icone: "fa-solid fa-check-circle",
+                    pesoIdeal: "Parabéns! Você está no peso ideal. Continue mantendo hábitos saudáveis de alimentação e exercícios."
+                };
+                if (imc < 30) return {
+                    texto: "Sobrepeso",
+                    cor: "text-orange-600",
+                    icone: "fa-solid fa-exclamation-circle",
+                    pesoIdeal: "Você está com sobrepeso. Recomenda-se adotar uma dieta balanceada e praticar atividades físicas regularmente."
+                };
+                if (imc < 35) return {
+                    texto: "Obesidade Grau I",
+                    cor: "text-red-600",
+                    icone: "fa-solid fa-exclamation-triangle",
+                    pesoIdeal: "Você apresenta obesidade grau I. É importante buscar orientação médica para um plano de emagrecimento saudável."
+                };
+                if (imc < 40) return {
+                    texto: "Obesidade Grau II",
+                    cor: "text-red-700",
+                    icone: "fa-solid fa-times-circle",
+                    pesoIdeal: "Você está com obesidade grau II. Recomenda-se uma avaliação médica completa e acompanhamento nutricional."
+                };
+                return {
+                    texto: "Obesidade Grau III",
+                    cor: "text-red-800",
+                    icone: "fa-solid fa-skull-crossbones",
+                    pesoIdeal: "Obesidade grau III detectada. É fundamental buscar acompanhamento médico e nutricional urgentemente."
+                };
+            };
+
+            const calcularPesoIdeal = (altura) => {
+                const pesoIdealMin = 18.5 * (altura * altura);
+                const pesoIdealMax = 24.9 * (altura * altura);
+                return {
+                    min: pesoIdealMin.toFixed(1),
+                    max: pesoIdealMax.toFixed(1)
+                };
+            };
+
+            const getClassificacaoIMC = resultado ? interpretarIMC(parseFloat(resultado)) : null;
+            const pesoIdeal = altura ? calcularPesoIdeal(parseFloat(altura)) : null;
+
+            return (
+                <div className="bg-white rounded-2xl shadow-2xl w-96 overflow-hidden transform transition-all hover:scale-105">
+                    <div className="bg-blue-500 text-white p-6 text-center">
+                        <h1 className="text-3xl font-bold tracking-tight">Calculadora de IMC</h1>
+                        <p className="text-sm mt-2 font-light opacity-90">Descubra sua classificação de peso</p>
+                    </div>
+
+                    <div className="p-6">
+                        <div className="mb-4">
+                            <label className="block mb-2 font-semibold text-gray-700">
+                                <i className="fas fa-weight mr-2"></i>Peso (kg):
+                            </label>
+                            <input
+                                type="number"
+                                value={peso}
+                                onChange={(e) => setPeso(e.target.value)}
+                                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors font-normal"
+                                placeholder="Digite seu peso"
+                            />
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block mb-2 font-semibold text-gray-700">
+                                <i className="fas fa-ruler-vertical mr-2"></i>Altura (m):
+                            </label>
+                            <input
+                                type="number"
+                                value={altura}
+                                onChange={(e) => setAltura(e.target.value)}
+                                className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors font-normal"
+                                placeholder="Digite sua altura"
+                                step="0.01"
+                            />
+                        </div>
+
+                        <button
+                            onClick={calcularIMC}
+                            className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors mb-4 shadow-md font-semibold tracking-wider"
+                        >
+                            <i className="fas fa-calculator mr-2"></i>Calcular IMC
+                        </button>
+
+                        {resultado && (
+                            <div className="text-center p-4 bg-gray-100 rounded-lg printable-result">
+                                <h2 className="text-2xl font-bold mb-4 hidden print:block">Resultado do IMC</h2>
+                                <div className="flex items-center justify-center mb-2">
+                                    <i className={`${getClassificacaoIMC.icone} text-3xl mr-3 ${getClassificacaoIMC.cor}`}></i>
+                                    <p className="text-xl font-bold">Seu IMC: {resultado}</p>
+                                </div>
+                                <p className={`font-semibold ${getClassificacaoIMC.cor} mb-3`}>
+                                    {getClassificacaoIMC.texto}
+                                </p>
+                                {pesoIdeal && (
+                                    <div className="text-sm">
+                                        <p className="mb-2 text-gray-800">
+                                            Peso ideal para sua altura:
+                                            <span className="font-bold"> {pesoIdeal.min} kg - {pesoIdeal.max} kg</span>
+                                        </p>
+                                        <p className="text-gray-700 italic">
+                                            {getClassificacaoIMC.pesoIdeal}
+                                        </p>
+                                    </div>
+                                )}
+                                <button
+                                    onClick={() => window.print()}
+                                    className="mt-4 w-full bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600 transition-colors shadow-md font-semibold tracking-wider print-button"
+                                >
+                                    <i className="fas fa-print mr-2"></i>Imprimir Resultados
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<ImcCalculator />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
